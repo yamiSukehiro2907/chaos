@@ -1,9 +1,10 @@
 const mongoose = require("mongoose");
 require("dotenv").config();
 
-const connectmongoDB = async (req, res) => {
+const connectMongoDB = async (req, res) => {
   console.log("Trying to connect to mongoDb database...");
   try {
+    
     const connect = await mongoose.connect(process.env.CONNECTION_STRING);
     console.log(
       "MongoDB database connected: ",
@@ -16,4 +17,4 @@ const connectmongoDB = async (req, res) => {
   }
 };
 
-module.exports = connectmongoDB
+module.exports = connectMongoDB
