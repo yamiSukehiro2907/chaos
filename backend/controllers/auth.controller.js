@@ -2,6 +2,7 @@ require("dotenv").config();
 const User = require("../models/userModel.js");
 const bcrypt = require('bcrypt')
 const jwt = require("jsonwebtoken")
+const genToken = require("../config/token");
 
 const signUpUser = async (req, res) => {
     const {username, email, password} = req.body;
@@ -70,22 +71,24 @@ const loginUser = async (req, res) => {
             return res.status(401).json({error: "Invalid credentials"});
         }
 
-        const accessToken = jwt.sign(
-            {userId: user._id, type: "access"},
-            process.env.ACCESS_TOKEN_SECRET,
-            {expiresIn: "15m"}
-        );
+        const accessToken = await genToken(user.id, "access", "15m");
 
-        const refreshToken = jwt.sign(
-            {userId: user._id, type: "refresh"},
-            process.env.REFRESH_TOKEN_SECRET,
-            {expiresIn: "7d"}
-        );
+        const refreshToken = await genToken(user.id, "refresh", "7d");
+
+        res.cookie("accessToken", accessToken, {
+            httpOnly: true,
+            sameSite: true,
+            maxAge: 15 * 60 * 1000
+        })
+
+        res.cookie("refreshToken", refreshToken, {
+            httpOnly: true,
+            sameSite: true,
+            maxAge: 7 * 24 * 60 * 60 * 1000
+        })
 
         return res.status(200).json({
             message: "Login successful",
-            accessToken,
-            refreshToken,
             user: {
                 id: user._id,
                 username: user.username,
