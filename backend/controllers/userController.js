@@ -17,7 +17,7 @@ const signUpUser = async (req, res) => {
     }
 
     // Validating existing user with same username
-    if (await User.findOne({email})) {
+    if (await User.findOne({username})) {
         return res.status(400).json({message: "Username already exists"});
     }
 
@@ -25,11 +25,15 @@ const signUpUser = async (req, res) => {
         return res.status(400).json({message: "Password is too short"});
     }
 
+    const salt = await bcrypt.genSalt(10);
+
     const newUser = await User.create({
         username,
         email,
-        password: await bcrypt.hash(password, 10),
+        password: await bcrypt.hash(password, salt),
     });
+
+    console.log(salt)
 
     if (newUser) {
         res.status(201).json({
@@ -46,46 +50,54 @@ function isEmailValid(email) {
 }
 
 const loginUser = async (req, res) => {
-    const {identifier, password} = req.body;
-    if (!identifier || !password) {
-        return res.status(400).send({error: "All fields are required"});
-    }
+    const {username, password} = req.body;
 
-    let user;
-    if (isEmailValid(identifier)) {
-        user = await User.findOne({email: identifier});
-    } else {
-        user = await User.findOne({username: identifier});
-    }
-
-    if (!user) {
-        return res.status(400).send({error: "User does not exist"});
+    // Input validation
+    if (!username || !password) {
+        return res.status(400).json({error: "All fields are required"});
     }
 
     try {
-        if (await bcrypt.compare(password, user.password)) {
-            const accessToken = await jwt.sign(
-                {userId: user.id, type: "access"},
-                process.env.ACCESS_TOKEN_SECRET,
-                {expiresIn: "15m"}
-            );
-            const refreshToken = await jwt.sign(
-                {userId: user.id, type: "refresh"},
-                process.env.REFRESH_TOKEN_SECRET,
-                {expiresIn: "7d"}
-            );
-            return res.status(200).json({
-                accessToken: accessToken,
-                refreshToken: refreshToken
-            })
-        } else {
-            return res.status(401).send({error: "Password is incorrect"});
+        // Find user
+        const user = await User.findOne({username});
+        if (!user) {
+            return res.status(401).json({error: "Invalid credentials"});
         }
+
+        // Verify password
+        const isPasswordValid = await bcrypt.compare(password, user.password);
+        if (!isPasswordValid) {
+            return res.status(401).json({error: "Invalid credentials"});
+        }
+
+        const accessToken = jwt.sign(
+            {userId: user._id, type: "access"},
+            process.env.ACCESS_TOKEN_SECRET,
+            {expiresIn: "15m"}
+        );
+
+        const refreshToken = jwt.sign(
+            {userId: user._id, type: "refresh"},
+            process.env.REFRESH_TOKEN_SECRET,
+            {expiresIn: "7d"}
+        );
+
+        return res.status(200).json({
+            message: "Login successful",
+            accessToken,
+            refreshToken,
+            user: {
+                id: user._id,
+                username: user.username,
+                email: user.email
+            }
+        });
+
     } catch (err) {
-        console.error(err);
-        return res.status(200).send({error: "Internal Server Error"});
+        console.error('Login error:', err);
+        return res.status(500).json({error: "Internal Server Error"});
     }
-}
+};
 
 
 module.exports = {signUpUser, loginUser};
