@@ -33,7 +33,6 @@ const userSchema = mongoose.Schema(
         story: [],
         replies: [],
         likes: [],
-        dislikes: [],
     },
     {timestamps: true},
 );
