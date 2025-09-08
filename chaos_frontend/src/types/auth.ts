@@ -20,43 +20,47 @@
 */
 
 export interface User {
-  id: string;
-  username: string;
-  email: string;
-  profilePicture?: string;
-  bio?: string;
-  followers?: Object[];
-  following?: Object[];
-  posts?: Object[];
-  reels?: Object[];
-  story?: Object[];
-  replies?: Object[];
-  likes?: Object[];
+    id: string;
+    username: string;
+    email: string;
+    profilePicture?: string;
+    bio?: string;
+    followers?: object[];
+    following?: object[];
+    posts?: object[];
+    reels?: object[];
+    story?: object[];
+    replies?: object[];
+    likes?: object[];
 }
 
 export interface LoginCredentials {
-  username: string;
-  password: string;
+    username: string;
+    password: string;
 }
 
 export interface SignUpCredentials {
-  username: string;
-  email: string;
-  password: string;
-}
-
-export interface LoginResponse {
-  message: string;
-  user: User | null;
-  accessToken: string;
-  refreshToken: string;
-  expiresIn: number;
+    username: string;
+    email: string;
+    password: string;
 }
 
 export interface AuthContextType {
-  // State
-  user: User | null;
-  isAuthenticated: boolean;
-  isLoading: boolean;
-  error: string | null;
+    // State
+    user: User | null;
+    isAuthenticated: boolean;
+    isLoading: boolean;
+    error: string | null;
+
+
+    // Actions
+    checkAuth(): Promise<void>;
+    login(credentials: LoginCredentials): Promise<void>;
+    register(credentials: SignUpCredentials): Promise<void>;
+
+}
+
+export interface AuthResponse {
+    user: User;
+    message: string;
 }
