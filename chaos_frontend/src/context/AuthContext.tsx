@@ -85,7 +85,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
 
     api.interceptors.request.use(
         (config) => {
-            // Only set Content-Type for requests with data
             if (config.data && config.method !== 'get') {
                 config.headers['Content-Type'] = 'application/json';
             }
@@ -100,12 +99,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
         (response: AxiosResponse) => response,
         (error: AxiosError) => {
             console.error("API Error:", error);
-
-            // Handle network errors
             if (error.code === 'ERR_NETWORK') {
                 console.error("Network error - check if backend is running and CORS is configured");
             }
-
             if (error.response?.status === 401 && state.isAuthenticated) {
                 dispatch({type: "LOGOUT"});
             }
@@ -116,9 +112,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
     const checkAuth = async (): Promise<void> => {
         try {
             dispatch({type: "SET_LOADING", payload: true});
-
             const response: AxiosResponse<AuthResponse> = await api.get("/users/profile");
-
             if (response.data && response.data.user) {
                 dispatch({type: "LOGIN_SUCCESS", payload: response.data.user});
             } else {
@@ -128,7 +122,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
             console.error("Authentication check failed:", error);
 
             if (axios.isAxiosError(error)) {
-                // Only logout if it's not a network error
                 if (error.response?.status === 401 || error.response?.status === 403) {
                     dispatch({type: "LOGOUT"});
                 } else if (error.code !== 'ERR_NETWORK') {
@@ -188,7 +181,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
     };
 
     const register = async (credentials: SignUpCredentials): Promise<void> => {
-        if (!credentials.email || !credentials.password) {
+        if (!credentials.email || !credentials.password || !credentials.username) {
             throw new Error("Invalid Credentials");
         }
 
@@ -196,7 +189,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
             dispatch({type: "SET_LOADING", payload: true});
             dispatch({type: "CLEAR_ERROR"});
 
-            const response: AxiosResponse<AuthResponse> = await api.post("/auth/register", credentials);
+            const response: AxiosResponse<AuthResponse> = await api.post("/auth/signup", credentials);
 
             if (response.data && response.data.user) {
                 dispatch({type: "LOGIN_SUCCESS", payload: response.data.user});
