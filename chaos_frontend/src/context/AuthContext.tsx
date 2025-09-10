@@ -1,4 +1,4 @@
-import React, {createContext, useContext, useReducer, type ReactNode} from "react";
+import React, {createContext, useContext, useReducer, type ReactNode, useEffect} from "react";
 import axios, {type AxiosInstance, type AxiosResponse, AxiosError} from "axios";
 import type {
     User,
@@ -219,11 +219,54 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
         }
     };
 
+    const logout = async (): Promise<void> => {
+        try {
+            dispatch({type: "SET_LOADING", payload: true});
+            dispatch({type: "CLEAR_ERROR"});
+
+            console.log("Attempting to logout");
+
+            const response = await api.post("/auth/logout");
+
+            if (response.status === 200 || response.data?.message === "User already logged out!") {
+                console.log("Logout successful");
+                dispatch({type: "LOGOUT"});
+            } else {
+                throw new Error("Logout failed with unexpected response.");
+            }
+        } catch (error) {
+            console.error("Logout error: ", error);
+            let errorMessage = "Logout Failed";
+            if (axios.isAxiosError(error)) {
+                if (error.code === 'ERR_NETWORK') {
+                    errorMessage = "Network error. Please check if the server is running.";
+                } else if (error.response?.data?.message) {
+                    errorMessage = error.response.data.message;
+                }
+            } else if (error instanceof Error) {
+                errorMessage = error.message;
+            }
+
+            dispatch({
+                type: "SET_ERROR",
+                payload: errorMessage,
+            });
+            throw error;
+        } finally {
+            dispatch({type: "SET_LOADING", payload: false});
+        }
+    }
+
+    useEffect(() => {
+        checkAuth();
+    }, []);
+
     const contextValue: AuthContextType = {
         ...state,
         login,
         register,
         checkAuth,
+        logout
     };
 
     return (

@@ -26,6 +26,11 @@ const userSchema = mongoose.Schema(
             default: "",
         },
 
+        refreshToken: {
+            type: String,
+            default: "",
+        },
+
         followers: [],
         following: [],
         posts: [],

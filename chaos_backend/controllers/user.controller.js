@@ -3,7 +3,7 @@ const User = require("../models/userModel");
 const profile = async (req, res) => {
     try {
         const id = req.id;
-        let user = await User.findById(id).select('-password');
+        let user = await User.findById(id).select('-password -refreshToken');
         if (!user) {
             return res.status(404).json({error: "User not found"});
         }

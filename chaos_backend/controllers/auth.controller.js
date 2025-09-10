@@ -2,7 +2,7 @@ require("dotenv").config();
 const User = require("../models/userModel.js");
 const bcrypt = require('bcrypt')
 const jwt = require("jsonwebtoken")
-const genToken = require("../config/token");
+const {genAccessToken, genRefreshToken} = require("../config/token");
 
 const signUpUser = async (req, res) => {
     const {username, email, password} = req.body;
@@ -71,9 +71,9 @@ const loginUser = async (req, res) => {
             return res.status(401).json({error: "Invalid credentials"});
         }
 
-        const accessToken = await genToken(user.id, "access", "15m");
+        const accessToken = await genAccessToken(user.id);
 
-        const refreshToken = await genToken(user.id, "refresh", "7d");
+        const refreshToken = await genRefreshToken(user.id);
 
         res.cookie("accessToken", accessToken, {
             httpOnly: true,
@@ -86,6 +86,9 @@ const loginUser = async (req, res) => {
             sameSite: true,
             maxAge: 7 * 24 * 60 * 60 * 1000
         })
+
+        user.refreshToken = refreshToken;
+        await user.save();
 
         return res.status(200).json({
             message: "Login successful",
@@ -103,4 +106,40 @@ const loginUser = async (req, res) => {
 };
 
 
-module.exports = {signUpUser, loginUser};
+const logoutUser = async (req, res) => {
+    try {
+        const accessToken = req.cookies.accessToken;
+        const refreshToken = req.cookies.refreshToken;
+        let userId;
+        if (refreshToken) {
+            jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET, (err, decoded) => {
+                if (decoded) {
+                    userId = decoded.id;
+                }
+            })
+        } else if (accessToken) {
+            jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
+                if (decoded) {
+                    userId = decoded.id;
+                }
+            })
+        }
+        if (userId) {
+            const user = await User.findOne({_id: userId});
+            if (!user) {
+                return res.status(200).json({message: "Logout successful"});
+            }
+            if (user.refreshToken === "") {
+                return res.status(409).json({error: "User already logged out!"})
+            }
+            user.refreshToken = "";
+            await user.save();
+        }
+        return res.status(200).json({message: "Logout successful"});
+
+    } catch (error) {
+        return res.status(500).json({error: "Internal Server Error"});
+    }
+}
+
+module.exports = {signUpUser, loginUser, logoutUser};

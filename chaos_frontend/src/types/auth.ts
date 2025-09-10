@@ -57,6 +57,7 @@ export interface AuthContextType {
     checkAuth(): Promise<void>;
     login(credentials: LoginCredentials): Promise<void>;
     register(credentials: SignUpCredentials): Promise<void>;
+    logout(): Promise<void>;
 
 }
 

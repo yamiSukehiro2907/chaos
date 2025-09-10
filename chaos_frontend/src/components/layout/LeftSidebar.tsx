@@ -1,7 +1,9 @@
-import {Home, Search, Compass, MessageCircle, Heart, PlusSquare, User, Settings, Eye} from 'lucide-react'
-import {Button} from '@/components/ui/button'
-import {Avatar, AvatarFallback, AvatarImage} from '@/components/ui/avatar'
-import {Card, CardContent} from '@/components/ui/card'
+import {Home, Search, Compass, MessageCircle, Heart, PlusSquare, User, Settings, Eye, LogOut} from 'lucide-react';
+import {Button} from '@/components/ui/button';
+import {Avatar, AvatarFallback, AvatarImage} from '@/components/ui/avatar';
+import {Card, CardContent} from '@/components/ui/card';
+import {useAuth} from "@/context/AuthContext.tsx";
+import {useNavigate} from "react-router-dom";
 
 const navigationItems = [
     {icon: Home, label: 'Home Feed', active: true},
@@ -12,9 +14,11 @@ const navigationItems = [
     {icon: Heart, label: 'Notifications'},
     {icon: PlusSquare, label: 'Create Post'},
     {icon: User, label: 'My Profile'},
-]
+];
 
 const LeftSidebar = () => {
+    const {logout} = useAuth();
+    const navigate = useNavigate()
     return (
         <aside
             className="fixed left-0 top-16 h-[calc(100vh-4rem)] w-64 bg-gradient-to-b from-gray-50 to-blue-50 border-r border-blue-200 shadow-lg p-4 overflow-y-auto">
@@ -42,7 +46,6 @@ const LeftSidebar = () => {
                     </CardContent>
                 </Card>
 
-
                 {/* Navigation */}
                 <nav className="flex-1 space-y-1">
                     <h3 className="text-sm font-semibold text-gray-700 mb-3 px-2">Navigate</h3>
@@ -63,12 +66,26 @@ const LeftSidebar = () => {
                     ))}
                 </nav>
 
-
-                {/* Settings */}
                 <div className="mt-auto pt-4 border-t border-blue-200">
                     <Button
                         variant="ghost"
-                        className="w-full justify-start text-gray-600 hover:text-blue-600 hover:bg-blue-50 transition-all"
+                        onClick={async (e) => {
+                            e.preventDefault()
+                            try {
+                                await logout()
+                                navigate("/landing")
+                            } catch (error) {
+                                console.log(error)
+                            }
+                        }}
+                        className="w-full justify-start text-gray-600 hover:text-red-600 hover:bg-red-50 transition-all"
+                    >
+                        <LogOut className="mr-3 h-4 w-4"/>
+                        <span className="text-sm">Log Out</span>
+                    </Button>
+                    <Button
+                        variant="ghost"
+                        className="w-full justify-start text-gray-600 hover:text-blue-600 hover:bg-blue-50 transition-all mt-1"
                     >
                         <Settings className="mr-3 h-4 w-4"/>
                         <span className="text-sm">Settings</span>
@@ -81,7 +98,7 @@ const LeftSidebar = () => {
                 </div>
             </div>
         </aside>
-    )
-}
+    );
+};
 
-export default LeftSidebar
+export default LeftSidebar;

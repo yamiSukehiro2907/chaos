@@ -65,12 +65,11 @@ const Feed = () => {
             ...prev,
             [postId]: !prev[postId as keyof typeof prev]
         }))
-        showNotification('Post bookmarked! 🔖')
+        showNotification('Post saved! 🔖')
     }
 
     return (
         <div className="space-y-6">
-            {/* Notification Toast */}
             {notification && (
                 <div
                     className="fixed top-20 right-4 bg-gradient-to-r from-blue-500 to-blue-600 text-white px-4 py-2 rounded-lg shadow-lg z-50 animate-pulse">
