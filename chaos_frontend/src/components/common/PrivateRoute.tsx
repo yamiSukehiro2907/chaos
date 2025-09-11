@@ -1,6 +1,5 @@
 import React from 'react';
 import {Navigate, Outlet} from 'react-router-dom';
-import {useAuth} from "@/context/AuthContext.tsx";
 import Loading from "./Loading.tsx"
 
 interface PrivateRouteProps {
@@ -8,7 +7,9 @@ interface PrivateRouteProps {
 }
 
 const PrivateRoute: React.FC<PrivateRouteProps> = ({children}) => {
-    const {isAuthenticated, isLoading} = useAuth();
+
+    const isLoading = false;
+    const isAuthenticated = true;
 
     if (isLoading) {
         return <Loading/>;

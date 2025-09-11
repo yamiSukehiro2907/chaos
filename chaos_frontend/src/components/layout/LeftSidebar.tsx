@@ -2,7 +2,6 @@ import {Home, Search, Compass, MessageCircle, Heart, PlusSquare, User, Settings,
 import {Button} from '@/components/ui/button';
 import {Avatar, AvatarFallback, AvatarImage} from '@/components/ui/avatar';
 import {Card, CardContent} from '@/components/ui/card';
-import {useAuth} from "@/context/AuthContext.tsx";
 import {useNavigate} from "react-router-dom";
 
 const navigationItems = [
@@ -17,7 +16,6 @@ const navigationItems = [
 ];
 
 const LeftSidebar = () => {
-    const {logout} = useAuth();
     const navigate = useNavigate()
     return (
         <aside
@@ -72,7 +70,6 @@ const LeftSidebar = () => {
                         onClick={async (e) => {
                             e.preventDefault()
                             try {
-                                await logout()
                                 navigate("/landing")
                             } catch (error) {
                                 console.log(error)
