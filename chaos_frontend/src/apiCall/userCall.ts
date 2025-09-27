@@ -14,3 +14,13 @@ export const fetchCurrentUser = async (): Promise<AuthResponse | undefined> => {
     throw error;
   }
 };
+
+export const getUserByUsername = async (username: string): Promise<void> => {
+  try {
+    const response = await api.get(`/users/profile/${username}`);
+    return response.data;
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+};

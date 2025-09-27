@@ -1,21 +1,25 @@
-import { fetchCurrentUser } from "@/apiCall/userCall";
-import { setUserData } from "@/redux/slices/userSlice";
 import { useEffect } from "react";
 import { useDispatch } from "react-redux";
+import { setUserData, setError } from "@/redux/slices/userSlice";
+import { fetchCurrentUser } from "@/apiCall/userCall";
 
 export const useCurrentUser = () => {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    const fetchUser = async () => {
+    const validateSession = async () => {
       try {
-        const response = await fetchCurrentUser();
-        dispatch(setUserData(response?.user));
+        const userObject = await fetchCurrentUser();
+        if (userObject) {
+          dispatch(setUserData(userObject));
+        } else {
+          throw new Error("API call succeeded but returned no user data.");
+        }
       } catch (error) {
-        console.error("Failed to fetch current user:", error);
+        console.error("Authentication check failed:", error);
+        dispatch(setError("No valid session found."));
       }
     };
-
-    fetchUser();
+    validateSession();
   }, [dispatch]);
 };

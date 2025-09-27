@@ -23,11 +23,13 @@ const SignIn: React.FC = () => {
     }
 
     try {
-      await signIn({
+      let r2 = await signIn({
         username: loginData.username,
         password: loginData.password,
       });
+      console.log(r2)
       const response = await fetchCurrentUser();
+      console.log(response)
       dispatch(setUserData(response));
       navigate("/home");
     } catch (error) {

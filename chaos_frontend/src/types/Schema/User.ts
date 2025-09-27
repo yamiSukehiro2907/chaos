@@ -7,6 +7,7 @@ export interface User {
   id: string;
   username: string;
   email: string;
+  name: string,
   profilePicture?: string;
   bio?: string;
   followers?: User[];
@@ -16,4 +17,5 @@ export interface User {
   story?: Story[];
   replies?: Replies[];
   likes?: object[];
+  createdAt: string
 }

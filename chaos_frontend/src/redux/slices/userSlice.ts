@@ -1,16 +1,18 @@
 import { createSlice } from "@reduxjs/toolkit";
 import type { User } from "@/types/Schema/User.ts";
 
-interface UserState {
+export interface UserState {
   userData: User | null;
   isLoading: boolean;
   error: string;
+  profileData: User| null;
 }
 
 const initialState: UserState = {
   userData: null,
   isLoading: true,
   error: "",
+  profileData: null,
 };
 
 export const userSlice = createSlice({
@@ -19,7 +21,7 @@ export const userSlice = createSlice({
   reducers: {
     setUserData: (state, action) => {
       state.userData = action.payload;
-      state.isLoading = false; 
+      state.isLoading = false;
       state.error = "";
     },
     clearUserData: (state) => {
@@ -33,9 +35,12 @@ export const userSlice = createSlice({
       state.error = action.payload;
       state.isLoading = false;
     },
+    setProfileData: (state, action) => {
+      state.profileData = action.payload;
+    },
   },
 });
 
-export const { setUserData, clearUserData, setLoading, setError } =
+export const { setUserData, clearUserData, setLoading, setError , setProfileData } =
   userSlice.actions;
 export default userSlice.reducer;

@@ -14,7 +14,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { setUserData } from "@/redux/slices/userSlice";
+import { clearUserData } from "@/redux/slices/userSlice";
 import { logOut } from "../../apiCall/authCalls";
 
 const navigationItems = [
@@ -86,7 +86,7 @@ const LeftSidebar = () => {
               e.preventDefault();
               try {
                 await logOut();
-                dispatch(setUserData(null));
+                dispatch(clearUserData());
                 navigate("/landing");
               } catch (error) {
                 console.log(error);
