@@ -2,9 +2,14 @@ import { FaGithub, FaLinkedin, FaGoogle } from "react-icons/fa";
 import React, { useState } from "react";
 import { User, Lock } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { signIn } from "../apiCall/authCalls";
+import { useDispatch } from "react-redux";
+import { setUserData } from "@/redux/slices/userSlice";
+import { fetchCurrentUser } from "@/apiCall/userCall";
 
 const SignIn: React.FC = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [loginData, setLoginData] = useState({
     username: "",
     password: "",
@@ -18,7 +23,12 @@ const SignIn: React.FC = () => {
     }
 
     try {
-      console.log("Login successful");
+      await signIn({
+        username: loginData.username,
+        password: loginData.password,
+      });
+      const response = await fetchCurrentUser();
+      dispatch(setUserData(response));
       navigate("/home");
     } catch (error) {
       console.log(error);
@@ -48,7 +58,6 @@ const SignIn: React.FC = () => {
         style={{ fontFamily: "'Poppins', sans-serif" }}
         className="relative w-[850px] h-[550px] bg-white mx-5 rounded-[30px] shadow-[0_0_30px_rgba(0,0,0,0.2)] overflow-hidden"
       >
-        {/* Login Form */}
         <div className="absolute top-0 left-1/2 w-1/2 h-full bg-white flex items-center text-gray-800 text-center p-10 z-20 opacity-100 pointer-events-auto">
           <div className="w-full">
             <h1 className="text-4xl font-medium -mt-2 mb-4">Login</h1>
@@ -118,13 +127,10 @@ const SignIn: React.FC = () => {
             </div>
           </div>
         </div>
-
-        {/* Sliding Background */}
         <div className="absolute w-full h-full pointer-events-none">
           <div className="absolute w-[300%] h-full bg-blue-400 rounded-[150px] z-5 -left-[250%] transition-all duration-[1800ms] ease-in-out"></div>
         </div>
 
-        {/* Welcome Panel - Left */}
         <div className="absolute left-0 w-1/2 h-full text-white flex flex-col justify-center items-center z-15 opacity-100 transition-all duration-[600ms] ease-in-out">
           <div>
             <h1 className="text-4xl font-medium mb-4">Hello, Welcome!</h1>

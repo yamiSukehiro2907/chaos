@@ -1,6 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const connectMongoDB = require("./config/mongoDB.js");
+const {configCloudinary} = require("./config/cloudinary.config.js")
 require("dotenv").config();
 const cookieParser = require("cookie-parser");
 
@@ -24,6 +25,8 @@ app.use("/api/users/", require("./routers/user.route.js"));
 
 async function startServer() {
     await connectMongoDB();
+
+    await configCloudinary();
 
     app.listen(port, () => {
         console.log(`Server is running at ${port}`);

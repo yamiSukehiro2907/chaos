@@ -1,3 +1,3 @@
 export interface Replies {
-    id: string;
+  id: string;
 }

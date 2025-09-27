@@ -1,3 +1,3 @@
 export interface Reel {
-    name: string;
+  name: string;
 }

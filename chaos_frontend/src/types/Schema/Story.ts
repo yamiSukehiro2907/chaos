@@ -1,3 +1,3 @@
-export interface Story{
-    name: string,
+export interface Story {
+  name: string;
 }

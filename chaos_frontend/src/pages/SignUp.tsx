@@ -2,6 +2,7 @@ import { FaGithub, FaLinkedin, FaGoogle } from "react-icons/fa";
 import React, { useState } from "react";
 import { User, Lock, Mail } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { signUp } from "@/apiCall/authCalls.ts";
 
 const SignUp: React.FC = () => {
   const navigate = useNavigate();
@@ -21,8 +22,8 @@ const SignUp: React.FC = () => {
       return;
     }
     try {
+      await signUp(registerData);
       navigate("/login");
-      console.log("Registered successful");
     } catch (error) {
       console.log(error);
     }
