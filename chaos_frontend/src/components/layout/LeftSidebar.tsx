@@ -16,21 +16,12 @@ import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { clearUserData } from "@/redux/slices/userSlice";
 import { logOut } from "../../apiCall/authCalls";
-
-const navigationItems = [
-  { icon: Home, label: "Home Feed", active: true },
-  { icon: Search, label: "Find People" },
-  { icon: Compass, label: "Discover Chaos" },
-  { icon: MessageCircle, label: "Chat Away" },
-  { icon: Heart, label: "Notifications" },
-  { icon: PlusSquare, label: "Create Post" },
-  { icon: User, label: "My Profile" },
-];
+import type { RootState } from "@/redux/store";
 
 const LeftSidebar = () => {
   const navigate = useNavigate();
-  // @ts-ignore
-  const { userData } = useSelector((state) => state?.user);
+
+  const { userData } = useSelector((state: RootState) => state.user);
   const dispatch = useDispatch();
   return (
     <aside className="fixed left-0 top-16 h-[calc(100vh-4rem)] w-64 bg-gradient-to-b from-gray-50 to-blue-50 border-r border-blue-200 shadow-lg p-4 overflow-y-auto">
@@ -48,35 +39,70 @@ const LeftSidebar = () => {
                 <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-400 rounded-full border-2 border-white"></div>
               </div>
               <div className="flex-1">
-                <p className="font-semibold text-gray-800">{userData.name}</p>
-                <p className="text-sm text-gray-600">@{userData.username}</p>
+                <p className="font-semibold text-gray-800">{userData?.name}</p>
+                <p className="text-sm text-gray-600">@{userData?.username}</p>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        {/* Navigation */}
         <nav className="flex-1 space-y-1">
-          {navigationItems.map((item) => (
-            <Button
-              key={item.label}
-              variant="ghost"
-              className={`w-full justify-start group transition-all duration-300 ${
-                item.active
-                  ? "bg-gradient-to-r from-blue-400 to-blue-600 text-white font-medium shadow-md hover:shadow-lg"
-                  : "text-gray-700 hover:text-blue-600 hover:bg-blue-50"
-              }`}
-            >
-              <item.icon
-                className={`mr-3 h-4 w-4 ${
-                  item.active
-                    ? "text-white"
-                    : "text-gray-500 group-hover:text-blue-600"
-                }`}
-              />
-              <span className="text-sm">{item.label}</span>
-            </Button>
-          ))}
+          <Button
+            variant="ghost"
+            className="w-full justify-start group transition-all duration-300 bg-gradient-to-r from-blue-400 to-blue-600 text-white font-medium shadow-md hover:shadow-lg"
+          >
+            <Home className="mr-3 h-4 w-4 text-white" />
+            <span className="text-sm">Home Feed</span>
+          </Button>
+          <Button
+            variant="ghost"
+            className="w-full justify-start group transition-all duration-300 text-gray-700 hover:text-blue-600 hover:bg-blue-50"
+          >
+            <Search className="mr-3 h-4 w-4 text-gray-500 group-hover:text-blue-600" />
+            <span className="text-sm">Find People</span>
+          </Button>
+
+          {/* Discover Chaos Button */}
+          <Button
+            variant="ghost"
+            className="w-full justify-start group transition-all duration-300 text-gray-700 hover:text-blue-600 hover:bg-blue-50"
+          >
+            <Compass className="mr-3 h-4 w-4 text-gray-500 group-hover:text-blue-600" />
+            <span className="text-sm">Discover Chaos</span>
+          </Button>
+
+          {/* Chat Away Button */}
+          <Button
+            variant="ghost"
+            className="w-full justify-start group transition-all duration-300 text-gray-700 hover:text-blue-600 hover:bg-blue-50"
+          >
+            <MessageCircle className="mr-3 h-4 w-4 text-gray-500 group-hover:text-blue-600" />
+            <span className="text-sm">Chat Away</span>
+          </Button>
+          <Button
+            variant="ghost"
+            className="w-full justify-start group transition-all duration-300 text-gray-700 hover:text-blue-600 hover:bg-blue-50"
+          >
+            <Heart className="mr-3 h-4 w-4 text-gray-500 group-hover:text-blue-600" />
+            <span className="text-sm">Notifications</span>
+          </Button>
+          <Button
+            variant="ghost"
+            className="w-full justify-start group transition-all duration-300 text-gray-700 hover:text-blue-600 hover:bg-blue-50"
+          >
+            <PlusSquare className="mr-3 h-4 w-4 text-gray-500 group-hover:text-blue-600" />
+            <span className="text-sm">Create Post</span>
+          </Button>
+          <Button
+            onClick={() => {
+              navigate(`/profile/${userData?.username}`);
+            }}
+            variant="ghost"
+            className="w-full justify-start group transition-all duration-300 text-gray-700 hover:text-blue-600 hover:bg-blue-50"
+          >
+            <User className="mr-3 h-4 w-4 text-gray-500 group-hover:text-blue-600" />
+            <span className="text-sm">My Profile</span>
+          </Button>
         </nav>
 
         <div className="mt-auto pt-4 border-t border-blue-200">

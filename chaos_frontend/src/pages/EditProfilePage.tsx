@@ -1,41 +1,48 @@
-import React, { useState } from "react";
-import { useSelector } from "react-redux";
+import React, { useState, useRef } from "react";
+import { useSelector, useDispatch } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 import { ArrowLeft, Camera } from "lucide-react";
+import type { RootState } from "@/redux/store";
+import { editProfile } from "@/apiCall/userCall";
+import { setUserData } from "@/redux/slices/userSlice";
 
 const EditProfilePage: React.FC = () => {
   const navigate = useNavigate();
-  //@ts-ignore
-  const { userData } = useSelector((state) => state.user);
+  const dispatch = useDispatch();
+  const { userData } = useSelector((state: RootState) => state.user);
 
-  const [formData, setFormData] = useState({
-    name: userData?.name || "",
-    username: userData?.username || "",
-    bio: userData?.bio || "Just a chaos creator ✨",
-  });
+  const [name, setName] = useState(userData?.name || "");
+  const [bio, setBio] = useState(userData?.bio || "");
+  const [username, setUsername] = useState(userData?.username || "");
+  const [profilePic, setProfilePic] = useState(userData?.profilePicture || "");
+  const [imageFile, setImageFile] = useState<File | null>(null);
 
-  const getInitials = (name: string): string => {
-    if (!name) return "??";
-    return name
-      .split(" ")
-      .map((n) => n[0])
-      .join("")
-      .toUpperCase();
+  const imageInputRef = useRef<HTMLInputElement>(null);
+
+  const handleUpdateImage = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      setProfilePic(URL.createObjectURL(file));
+      setImageFile(file);
+    }
   };
 
-  const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Dispatch an action to update the user's profile via API
-    console.log("Updated profile data:", formData);
-    alert("Profile saved! (Check console for data)");
-    navigate(`/${formData.username}`);
+    try {
+      const formData = new FormData();
+      formData.append("name", name);
+      formData.append("bio", bio);
+      formData.append("username", username);
+      if (imageFile) {
+        formData.append("profilePic", imageFile);
+      }
+      const data = await editProfile(formData);
+      dispatch(setUserData(data));
+      navigate(`/profile/${username}`);
+    } catch (error) {
+      console.error(`Cannot Edit profile: ${error}`);
+    }
   };
 
   if (!userData) {
@@ -51,7 +58,7 @@ const EditProfilePage: React.FC = () => {
       <div className="max-w-2xl mx-auto px-4">
         <div className="mb-4">
           <Link
-            to={`/${userData?.username}`}
+            to={`/profile/${userData?.username}`}
             className="flex items-center text-gray-600 hover:text-blue-600 font-medium transition-colors"
           >
             <ArrowLeft className="w-5 h-5 mr-2" />
@@ -64,25 +71,30 @@ const EditProfilePage: React.FC = () => {
               Edit Your Profile
             </h1>
             <form onSubmit={handleSubmit}>
-              <div className="flex items-center space-x-6 mb-8">
+              <div className="flex justify-center mb-8">
                 <div className="relative">
-                  <div className="w-24 h-24 bg-gradient-to-br from-blue-500 to-green-500 rounded-full flex items-center justify-center text-white text-3xl font-bold">
-                    {getInitials(formData.name)}
-                  </div>
-                  <button
-                    type="button"
-                    className="absolute -bottom-1 -right-1 w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center border-2 border-white hover:bg-blue-700"
+                  <img
+                    src={profilePic}
+                    alt="Profile"
+                    className="w-24 h-24 rounded-full object-cover border-4 border-white shadow-sm"
+                  />
+                  <div
+                    onClick={() => imageInputRef?.current?.click()}
+                    className="absolute -bottom-1 -right-1 w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center border-2 border-white hover:bg-blue-700 cursor-pointer"
                   >
                     <Camera className="w-4 h-4" />
-                  </button>
-                </div>
-                <div>
-                  <h2 className="text-xl font-bold text-gray-800">
-                    {formData.name}
-                  </h2>
-                  <p className="text-gray-500">@{formData.username}</p>
+                  </div>
                 </div>
               </div>
+
+              <input
+                type="file"
+                hidden
+                ref={imageInputRef}
+                onChange={handleUpdateImage}
+                accept="image/*"
+              />
+
               <div className="space-y-6">
                 <div>
                   <label
@@ -93,10 +105,9 @@ const EditProfilePage: React.FC = () => {
                   </label>
                   <input
                     type="text"
+                    value={name}
                     id="name"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleInputChange}
+                    onChange={(e) => setName(e.target.value)}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
                   />
                 </div>
@@ -110,11 +121,9 @@ const EditProfilePage: React.FC = () => {
                   <input
                     type="text"
                     id="username"
-                    name="username"
-                    value={formData.username}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-100 cursor-not-allowed"
-                    disabled
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
                   />
                 </div>
                 <div>
@@ -126,18 +135,16 @@ const EditProfilePage: React.FC = () => {
                   </label>
                   <textarea
                     id="bio"
-                    name="bio"
                     rows={3}
-                    value={formData.bio}
-                    onChange={handleInputChange}
+                    value={bio}
+                    onChange={(e) => setBio(e.target.value)}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
-                    placeholder="Tell us a little about yourself..."
                   />
                 </div>
               </div>
               <div className="flex justify-end mt-8 space-x-4">
                 <Link
-                  to={`/${userData?.username}`}
+                  to={`/profile/${userData?.username}`}
                   className="px-6 py-2 bg-gray-100 text-gray-700 rounded-full font-semibold hover:bg-gray-200 transition-all"
                 >
                   Cancel

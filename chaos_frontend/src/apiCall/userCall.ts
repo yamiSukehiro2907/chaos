@@ -1,13 +1,9 @@
-import type { AxiosResponse } from "axios";
-import { type AuthResponse } from "@/types/auth.ts";
 import api from "@/apiCall/axiosConfig.ts";
+import type { User } from "@/types/Schema/User";
 
-export const fetchCurrentUser = async (): Promise<AuthResponse | undefined> => {
+export const fetchCurrentUser = async (): Promise<User> => {
   try {
-    const response: AxiosResponse<AuthResponse> = await api.get(
-      "/users/profile",
-      { withCredentials: true }
-    );
+    const response = await api.get("/users/profile", { withCredentials: true });
     return response.data;
   } catch (error) {
     console.error(error);
@@ -15,9 +11,22 @@ export const fetchCurrentUser = async (): Promise<AuthResponse | undefined> => {
   }
 };
 
-export const getUserByUsername = async (username: string): Promise<void> => {
+export const getUserByUsername = async (username: string): Promise<User> => {
   try {
     const response = await api.get(`/users/profile/${username}`);
+    return response.data;
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+};
+
+export const editProfile = async (formData: FormData): Promise<User> => {
+  try {
+    const response = await api.put("/users/editProfile", formData, {
+      withCredentials: true,
+    });
+    console.log(response);
     return response.data;
   } catch (error) {
     console.error(error);

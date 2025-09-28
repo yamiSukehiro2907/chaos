@@ -11,17 +11,104 @@ import {
   Edit3,
   Loader2,
 } from "lucide-react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { getUserByUsername } from "@/apiCall/userCall";
 import { setProfileData } from "@/redux/slices/userSlice";
+import type { RootState } from "@/redux/store";
+
+// ProfilePicture Component
+interface ProfilePictureProps {
+  src?: string;
+  name: string;
+  size?: "sm" | "md" | "lg" | "xl";
+  className?: string;
+  showOnlineIndicator?: boolean;
+}
+
+const ProfilePicture: React.FC<ProfilePictureProps> = ({
+  src,
+  name,
+  size = "md",
+  className = "",
+  showOnlineIndicator = false,
+}) => {
+  const [imageError, setImageError] = useState(false);
+
+  const getInitials = (fullName: string): string => {
+    if (!fullName) return "??";
+    return fullName
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase()
+      .slice(0, 2);
+  };
+
+  const sizeClasses = {
+    sm: "w-8 h-8",
+    md: "w-12 h-12",
+    lg: "w-24 h-24 sm:w-32 sm:h-32",
+    xl: "w-32 h-32 sm:w-40 sm:h-40",
+  };
+
+  const textSizes = {
+    sm: "text-sm",
+    md: "text-base",
+    lg: "text-2xl sm:text-3xl",
+    xl: "text-3xl sm:text-4xl",
+  };
+
+  const indicatorSizes = {
+    sm: "w-2 h-2 bottom-0 right-0",
+    md: "w-3 h-3 bottom-0 right-0",
+    lg: "w-6 h-6 bottom-2 right-2",
+    xl: "w-8 h-8 bottom-2 right-2",
+  };
+
+  const handleImageError = () => {
+    setImageError(true);
+  };
+
+  return (
+    <div className={`relative ${className}`}>
+      <div
+        className={`${sizeClasses[size]} rounded-full overflow-hidden border-4 border-white shadow-lg`}
+      >
+        {src && !imageError ? (
+          <img
+            src={src}
+            alt={`${name}'s profile`}
+            className="w-full h-full object-cover"
+            onError={handleImageError}
+            loading="lazy"
+          />
+        ) : (
+          <div className="w-full h-full bg-gradient-to-br from-blue-500 to-green-500 flex items-center justify-center">
+            <span className={`font-bold text-white ${textSizes[size]}`}>
+              {getInitials(name)}
+            </span>
+          </div>
+        )}
+      </div>
+
+      {showOnlineIndicator && (
+        <div
+          className={`absolute ${indicatorSizes[size]} bg-green-500 border-2 border-white rounded-full`}
+        ></div>
+      )}
+    </div>
+  );
+};
 
 const ProfilePage: React.FC = () => {
   const { username } = useParams();
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
-  //@ts-ignore
-  const { profileData, userData } = useSelector((state) => state?.user);
+  const { profileData, userData } = useSelector(
+    (state: RootState) => state?.user
+  );
 
   const [activeTab, setActiveTab] = useState<
     "posts" | "reels" | "stories" | "replies"
@@ -53,20 +140,12 @@ const ProfilePage: React.FC = () => {
     getProfile();
   }, [username, dispatch]);
 
+
   const formatDate = (dateString: string): string => {
     return new Date(dateString).toLocaleDateString("en-US", {
       month: "long",
       year: "numeric",
     });
-  };
-
-  const getInitials = (name: string): string => {
-    if (!name) return "??";
-    return name
-      .split(" ")
-      .map((n) => n[0])
-      .join("")
-      .toUpperCase();
   };
 
   const handleFollow = () => {
@@ -141,7 +220,6 @@ const ProfilePage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-      {/* Navigation */}
       <nav className="bg-white shadow-sm border-b sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
@@ -160,27 +238,27 @@ const ProfilePage: React.FC = () => {
               </div>
             </div>
             <div className="flex items-center space-x-4">
-              <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white font-semibold text-sm cursor-pointer">
-                {userData ? getInitials(userData.name) : "??"}
-              </div>
+              <ProfilePicture
+                src={userData?.profilePicture}
+                name={userData?.name || "User"}
+                size="sm"
+                className="cursor-pointer"
+              />
             </div>
           </div>
         </div>
       </nav>
 
       <div className="max-w-4xl mx-auto px-4 py-8">
-        {/* Profile Header */}
         <div className="bg-white rounded-2xl shadow-lg p-6 mb-8">
           <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between">
             <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-6">
-              <div className="relative">
-                <div className="w-24 h-24 sm:w-32 sm:h-32 bg-gradient-to-br from-blue-500 to-green-500 rounded-full border-4 border-white shadow-lg flex items-center justify-center">
-                  <span className="text-2xl sm:text-3xl font-bold text-white">
-                    {getInitials(profileData?.name || "")}
-                  </span>
-                </div>
-                <div className="absolute bottom-2 right-2 w-6 h-6 bg-green-500 border-2 border-white rounded-full"></div>
-              </div>
+              <ProfilePicture
+                src={profileData?.profilePicture}
+                name={profileData?.name || "Unknown User"}
+                size="lg"
+                showOnlineIndicator={true}
+              />
               <div className="mt-4 sm:mt-0">
                 <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
                   {profileData?.name || "Unknown User"}
@@ -188,6 +266,11 @@ const ProfilePage: React.FC = () => {
                 <p className="text-gray-600 text-lg">
                   @{profileData?.username || "unknown"}
                 </p>
+                {profileData?.bio && (
+                  <p className="text-gray-700 mt-2 text-base leading-relaxed">
+                    {profileData.bio}
+                  </p>
+                )}
                 <div className="flex items-center mt-2 text-sm text-gray-500">
                   <Calendar className="w-4 h-4 mr-1" />
                   <span>
@@ -201,12 +284,14 @@ const ProfilePage: React.FC = () => {
             </div>
             {userData?.username === profileData?.username ? (
               <div className="flex space-x-3 mt-4 sm:mt-0">
-                <Link
-                  to="/edit-profile"
+                <button
+                  onClick={() => {
+                    navigate("/profile/edit");
+                  }}
                   className="px-6 py-2 bg-gray-100 text-gray-700 rounded-full font-semibold hover:bg-gray-200 transition-all flex items-center"
                 >
                   Edit Profile
-                </Link>
+                </button>
                 <button className="p-2 border border-gray-300 rounded-full hover:bg-gray-50">
                   <MoreHorizontal className="w-5 h-5 text-gray-600" />
                 </button>

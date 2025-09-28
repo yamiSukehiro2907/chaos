@@ -3,7 +3,6 @@ const {uploadCloudinary} = require("../config/cloudinary.config.js");
 
 const profile = async (req, res) => {
     try {
-        console.log("API HIT");
         const id = req.id;
         let user = await User.findById(id).select("-password -refreshToken");
         if (!user) {
@@ -30,15 +29,13 @@ const getProfile = async (req, res) => {
 
 const editProfile = async (req, res) => {
     try {
-        console.log("API HIT");
         const id = req.id
         const currentUser = await User.findById(id);
         const {username, name, bio} = req.body;
         if (!currentUser) {
             return res.status(404).json({message: "User not found"});
         }
-
-        if (username) {
+        if (username && currentUser.username !== username) {
             const userWithSameUsername = await User.findOne({username: username});
             if (userWithSameUsername) {
                 return res.status(400).json({message: "Username is already in use"});
@@ -46,18 +43,23 @@ const editProfile = async (req, res) => {
             currentUser.username = username;
         }
 
-        if (name) {
+        if (name && currentUser.name !== name) {
             currentUser.name = name;
         }
 
-        if (bio) {
+        if (bio && currentUser.bio !== bio) {
             currentUser.bio = bio;
         }
 
         if (req.file) {
-            console.log("Saving file");
-            currentUser.profilePicture = await uploadCloudinary(req.file);
-            console.log("Failed to save");
+            try {
+                currentUser.profilePicture = await uploadCloudinary(req.file.path);
+            } catch (uploadError) {
+                return res.status(500).json({
+                    message: "Failed to upload image",
+                    error: uploadError.message
+                });
+            }
         }
 
         const updatedUser = await currentUser.save();
