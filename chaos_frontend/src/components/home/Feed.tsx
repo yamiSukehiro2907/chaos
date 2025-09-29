@@ -91,7 +91,7 @@ const Feed = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="w-full space-y-6">
       {notification && (
         <div className="fixed top-20 right-4 bg-gradient-to-r from-blue-500 to-blue-600 text-white px-4 py-2 rounded-lg shadow-lg z-50 animate-pulse">
           {notification}
@@ -101,12 +101,12 @@ const Feed = () => {
       {posts.map((post) => (
         <Card
           key={post.id}
-          className="bg-white/80 backdrop-blur-sm border border-blue-200 shadow-lg hover:shadow-xl transition-all duration-300"
+          className="w-full bg-white/80 backdrop-blur-sm border border-blue-200 shadow-lg hover:shadow-xl transition-all duration-300"
         >
           {/* Post Header */}
-          <div className="flex items-center justify-between p-4 pb-3">
-            <div className="flex items-center space-x-3">
-              <Avatar className="ring-2 ring-blue-300 hover:ring-blue-400 transition-all">
+          <div className="flex items-center justify-between p-6 pb-4">
+            <div className="flex items-center space-x-4">
+              <Avatar className="w-12 h-12 ring-2 ring-blue-300 hover:ring-blue-400 transition-all">
                 <AvatarImage src={post.user.avatar} alt={post.user.name} />
                 <AvatarFallback className="bg-gradient-to-br from-blue-200 to-blue-300 text-blue-700 font-semibold">
                   {post.user.name
@@ -116,7 +116,9 @@ const Feed = () => {
                 </AvatarFallback>
               </Avatar>
               <div>
-                <p className="font-medium text-gray-800">{post.user.name}</p>
+                <p className="font-medium text-gray-800 text-lg">
+                  {post.user.name}
+                </p>
                 <p className="text-sm text-gray-600">
                   @{post.user.username} • {post.timestamp}
                 </p>
@@ -131,29 +133,31 @@ const Feed = () => {
             </Button>
           </div>
 
-          <CardContent className="pt-0">
+          <CardContent className="pt-0 px-6 pb-6">
             {/* Post Content */}
-            <p className="mb-3 leading-relaxed text-gray-800">{post.content}</p>
+            <p className="mb-4 leading-relaxed text-gray-800 text-base">
+              {post.content}
+            </p>
 
             {/* Post Image */}
             {post.image && (
-              <div className="mb-4 rounded-lg overflow-hidden border border-blue-200">
+              <div className="mb-6 rounded-xl overflow-hidden border border-blue-200">
                 <img
                   src={post.image}
                   alt="Post content"
-                  className="w-full h-64 object-cover hover:scale-105 transition-transform duration-300"
+                  className="w-full h-80 object-cover hover:scale-105 transition-transform duration-300"
                 />
               </div>
             )}
 
             {/* Post Actions */}
-            <div className="flex items-center justify-between pt-3 border-t border-blue-200">
-              <div className="flex items-center space-x-6">
+            <div className="flex items-center justify-between pt-4 border-t border-blue-200">
+              <div className="flex items-center space-x-8">
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => handleLike(post.id)}
-                  className={`transition-colors ${
+                  className={`transition-colors px-4 py-2 ${
                     likedPosts[post.id as keyof typeof likedPosts]
                       ? "text-red-500 hover:text-red-600"
                       : "text-gray-500 hover:text-red-500 hover:bg-red-50"
@@ -174,7 +178,7 @@ const Feed = () => {
                   variant="ghost"
                   size="sm"
                   onClick={() => handleComment()}
-                  className="text-gray-500 hover:text-blue-600 hover:bg-blue-50 transition-colors"
+                  className="text-gray-500 hover:text-blue-600 hover:bg-blue-50 transition-colors px-4 py-2"
                 >
                   <MessageCircle className="w-5 h-5 mr-2" />
                   {post.comments}
@@ -184,9 +188,10 @@ const Feed = () => {
                   variant="ghost"
                   size="sm"
                   onClick={() => handleShare()}
-                  className="text-gray-500 hover:text-blue-600 hover:bg-blue-50 transition-colors"
+                  className="text-gray-500 hover:text-blue-600 hover:bg-blue-50 transition-colors px-4 py-2"
                 >
-                  <Share className="w-5 h-5" />
+                  <Share className="w-5 h-5 mr-2" />
+                  Share
                 </Button>
               </div>
 
@@ -194,7 +199,7 @@ const Feed = () => {
                 variant="ghost"
                 size="icon"
                 onClick={() => handleBookmark(post.id)}
-                className={`transition-colors ${
+                className={`transition-colors w-10 h-10 ${
                   bookmarkedPosts[post.id as keyof typeof bookmarkedPosts]
                     ? "text-blue-600 hover:text-blue-700"
                     : "text-gray-500 hover:text-blue-600 hover:bg-blue-50"

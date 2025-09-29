@@ -1,0 +1,56 @@
+const Post = require("../models/post.model");
+const User = require("../models/user.model");
+const {uploadCloudinary} = require("../config/cloudinary.config");
+
+
+const getAllPosts = async (req, res) => {
+    try {
+        const posts = await Post.find({});
+        return res.status(200).json(posts);
+    } catch (err) {
+        return res.status(500).json({message: "Internal Server Error"});
+    }
+}
+
+const createPost = async (req, res) => {
+    try {
+        const id = req.id;
+        const user = await User.findById(id);
+        if (!user) {
+            return res.status(404).json({message: "User not found"});
+        }
+        console.log(req.body);
+        const {mediaType, caption} = req.body;
+
+        if (!mediaType || !caption) {
+            return res.status(400).json({message: "All fields are required"});
+        }
+
+        let mediaUrl;
+
+        if (req.file) {
+            try {
+                mediaUrl = await uploadCloudinary(req.file.path)
+            } catch (uploadError) {
+                return res.status(500).json({
+                    message: "Failed to upload image",
+                    error: uploadError.message
+                });
+            }
+        }
+        const post = await Post.create({
+            author: user,
+            mediaType: mediaType,
+            caption: caption,
+            mediaUrl: mediaUrl
+        })
+
+
+        return res.status(201).json({post});
+    } catch (err) {
+        console.log(err);
+        return res.status(500).json({message: "Internal Server Error"});
+    }
+}
+
+module.exports = {getAllPosts, createPost};

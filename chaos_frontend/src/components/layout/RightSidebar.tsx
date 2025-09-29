@@ -1,7 +1,7 @@
-import { MessageCircle, Eye } from "lucide-react";
+import { MessageCircle, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ProfilePicture } from "../common/ProfilePicture";
 
 const suggestions = [
   {
@@ -59,56 +59,54 @@ const messages = [
 
 const RightSidebar = () => {
   return (
-    <aside className="fixed right-0 top-16 h-[calc(100vh-4rem)] w-80 bg-gradient-to-b from-gray-50 to-blue-50 border-l border-blue-200 shadow-lg p-4 overflow-y-auto">
-      <div className="space-y-6">
-        {/* Who to Stalk */}
+    <aside className="fixed right-0 top-16 h-[calc(100vh-4rem)] w-[400px] bg-gradient-to-b from-gray-50 to-blue-50 border-l border-blue-200 shadow-lg p-6 overflow-y-auto">
+      <div className="space-y-8">
         <Card className="bg-white/90 backdrop-blur-sm border border-blue-200 shadow-md">
           <CardHeader className="pb-3">
             <CardTitle className="text-lg flex items-center gap-2">
-              <span>👀</span>
-              Who to stalk next?
+              <span>🤝</span>
+              People you might know
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-3">
+          <CardContent className="space-y-4">
             {suggestions.map((user) => (
               <div
                 key={user.id}
-                className="flex items-center justify-between p-2 rounded-lg hover:bg-blue-50 transition-colors group"
+                className="flex items-center justify-between p-3 rounded-lg hover:bg-blue-50 transition-colors group"
               >
-                <div className="flex items-center space-x-3">
-                  <div className="relative">
-                    <Avatar className="w-10 h-10 ring-2 ring-blue-200 group-hover:ring-blue-400 transition-all">
-                      <AvatarImage src={user.avatar} alt={user.name} />
-                      <AvatarFallback className="bg-gradient-to-br from-blue-400 to-blue-600 text-white">
-                        {user.name
-                          .split(" ")
-                          .map((n) => n[0])
-                          .join("")}
-                      </AvatarFallback>
-                    </Avatar>
-                  </div>
+                <div className="flex items-center space-x-4">
+                  <ProfilePicture
+                    src={user.avatar}
+                    name={user.name}
+                    size="sm"
+                    // @ts-ignore
+                    gradientFrom="from-blue-400"
+                    gradientTo="to-blue-600"
+                  />
                   <div>
                     <p className="font-medium text-sm text-gray-800">
                       {user.name}
                     </p>
-                    <p className="text-xs text-gray-500">@{user.username}</p>
+                    <p className="text-xs text-gray-500 mb-1">
+                      @{user.username}
+                    </p>
                     <p className="text-xs text-blue-600">{user.status}</p>
                   </div>
                 </div>
                 <Button
                   size="sm"
-                  className="bg-gradient-to-r from-blue-400 to-blue-600 hover:from-blue-500 hover:to-blue-700 text-white text-xs shadow-md hover:shadow-lg transition-all"
+                  className="bg-gradient-to-r from-blue-400 to-blue-600 hover:from-blue-500 hover:to-blue-700 text-white text-xs shadow-md hover:shadow-lg transition-all px-3 py-1.5"
                 >
-                  <Eye className="w-3 h-3 mr-1" />
-                  Stalk
+                  <UserPlus className="w-3 h-3 mr-1" />
+                  Connect
                 </Button>
               </div>
             ))}
             <Button
               variant="ghost"
-              className="w-full text-sm text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+              className="w-full text-sm text-blue-600 hover:text-blue-700 hover:bg-blue-50 mt-2"
             >
-              Find more people to stalk
+              Discover more people
             </Button>
           </CardContent>
         </Card>
@@ -126,28 +124,23 @@ const RightSidebar = () => {
               </Button>
             </div>
           </CardHeader>
-          <CardContent className="space-y-3">
+          <CardContent className="space-y-4">
             {messages.map((msg) => (
               <div
                 key={msg.id}
-                className="flex items-start space-x-3 p-2 rounded-lg hover:bg-blue-50 cursor-pointer transition-colors group"
+                className="flex items-start space-x-3 p-3 rounded-lg hover:bg-blue-50 cursor-pointer transition-colors group"
               >
-                <div className="relative">
-                  <Avatar className="w-8 h-8">
-                    <AvatarImage src={msg.avatar} alt={msg.name} />
-                    <AvatarFallback className="bg-gradient-to-br from-pink-400 to-pink-600 text-white text-xs">
-                      {msg.name
-                        .split(" ")
-                        .map((n) => n[0])
-                        .join("")}
-                    </AvatarFallback>
-                  </Avatar>
-                  {msg.isOnline && (
-                    <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-400 rounded-full border border-white"></div>
-                  )}
-                </div>
+                <ProfilePicture
+                  src={msg.avatar}
+                  name={msg.name}
+                  // @ts-ignore
+                  size="xs"
+                  showOnlineIndicator={msg.isOnline}
+                  gradientFrom="from-pink-400"
+                  gradientTo="to-pink-600"
+                />
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between mb-1">
                     <p className="font-medium text-sm text-gray-800">
                       {msg.name}
                     </p>
@@ -161,7 +154,7 @@ const RightSidebar = () => {
             ))}
             <Button
               variant="ghost"
-              className="w-full text-sm text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+              className="w-full text-sm text-blue-600 hover:text-blue-700 hover:bg-blue-50 mt-2"
             >
               View all conversations
             </Button>

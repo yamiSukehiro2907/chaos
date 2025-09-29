@@ -10,37 +10,111 @@ import {
   LogOut,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { clearUserData } from "@/redux/slices/userSlice";
 import { logOut } from "../../apiCall/authCalls";
 import type { RootState } from "@/redux/store";
+import { useState } from "react";
+
+// ProfilePicture Component for LeftSidebar
+interface ProfilePictureProps {
+  src?: string;
+  name: string;
+  size?: "sm" | "md" | "lg";
+  className?: string;
+  showOnlineIndicator?: boolean;
+}
+
+const ProfilePicture: React.FC<ProfilePictureProps> = ({
+  src,
+  name,
+  size = "md",
+  className = "",
+  showOnlineIndicator = false,
+}) => {
+  const [imageError, setImageError] = useState(false);
+
+  const getInitials = (fullName: string): string => {
+    if (!fullName) return "U";
+    return fullName
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase()
+      .slice(0, 2);
+  };
+
+  const sizeClasses = {
+    sm: "w-8 h-8",
+    md: "w-12 h-12",
+    lg: "w-16 h-16",
+  };
+
+  const textSizes = {
+    sm: "text-xs",
+    md: "text-sm",
+    lg: "text-base",
+  };
+
+  const handleImageError = () => {
+    setImageError(true);
+  };
+
+  return (
+    <div className={`relative ${className}`}>
+      <div
+        className={`${sizeClasses[size]} rounded-full overflow-hidden ring-2 ring-blue-300 hover:ring-blue-500 transition-all shadow-md`}
+      >
+        {src && !imageError ? (
+          <img
+            src={src}
+            alt={`${name}'s profile`}
+            className="w-full h-full object-cover"
+            onError={handleImageError}
+            loading="lazy"
+          />
+        ) : (
+          <div className="w-full h-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center">
+            <span className={`font-semibold text-white ${textSizes[size]}`}>
+              {getInitials(name)}
+            </span>
+          </div>
+        )}
+      </div>
+
+      {showOnlineIndicator && (
+        <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-400 rounded-full border-2 border-white"></div>
+      )}
+    </div>
+  );
+};
 
 const LeftSidebar = () => {
   const navigate = useNavigate();
-
   const { userData } = useSelector((state: RootState) => state.user);
   const dispatch = useDispatch();
+
   return (
     <aside className="fixed left-0 top-16 h-[calc(100vh-4rem)] w-64 bg-gradient-to-b from-gray-50 to-blue-50 border-r border-blue-200 shadow-lg p-4 overflow-y-auto">
       <div className="flex flex-col h-full space-y-6">
         <Card className="bg-white/80 backdrop-blur-sm border border-blue-200 shadow-md">
           <CardContent className="p-4">
             <div className="flex items-center space-x-3">
-              <div className="relative">
-                <Avatar className="w-12 h-12 ring-2 ring-blue-300 hover:ring-blue-500 transition-all">
-                  <AvatarImage src="/placeholder.svg" alt="Profile" />
-                  <AvatarFallback className="bg-gradient-to-br from-blue-400 to-blue-600 text-white">
-                    User
-                  </AvatarFallback>
-                </Avatar>
-                <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-400 rounded-full border-2 border-white"></div>
-              </div>
+              <ProfilePicture
+                src={userData?.profilePicture}
+                name={userData?.name || "User"}
+                size="md"
+                showOnlineIndicator={true}
+              />
               <div className="flex-1">
-                <p className="font-semibold text-gray-800">{userData?.name}</p>
-                <p className="text-sm text-gray-600">@{userData?.username}</p>
+                <p className="font-semibold text-gray-800">
+                  {userData?.name || "User"}
+                </p>
+                <p className="text-sm text-gray-600">
+                  @{userData?.username || "username"}
+                </p>
               </div>
             </div>
           </CardContent>
@@ -54,6 +128,7 @@ const LeftSidebar = () => {
             <Home className="mr-3 h-4 w-4 text-white" />
             <span className="text-sm">Home Feed</span>
           </Button>
+
           <Button
             variant="ghost"
             className="w-full justify-start group transition-all duration-300 text-gray-700 hover:text-blue-600 hover:bg-blue-50"
@@ -62,7 +137,6 @@ const LeftSidebar = () => {
             <span className="text-sm">Find People</span>
           </Button>
 
-          {/* Discover Chaos Button */}
           <Button
             variant="ghost"
             className="w-full justify-start group transition-all duration-300 text-gray-700 hover:text-blue-600 hover:bg-blue-50"
@@ -71,7 +145,6 @@ const LeftSidebar = () => {
             <span className="text-sm">Discover Chaos</span>
           </Button>
 
-          {/* Chat Away Button */}
           <Button
             variant="ghost"
             className="w-full justify-start group transition-all duration-300 text-gray-700 hover:text-blue-600 hover:bg-blue-50"
@@ -79,6 +152,7 @@ const LeftSidebar = () => {
             <MessageCircle className="mr-3 h-4 w-4 text-gray-500 group-hover:text-blue-600" />
             <span className="text-sm">Chat Away</span>
           </Button>
+
           <Button
             variant="ghost"
             className="w-full justify-start group transition-all duration-300 text-gray-700 hover:text-blue-600 hover:bg-blue-50"
@@ -86,13 +160,18 @@ const LeftSidebar = () => {
             <Heart className="mr-3 h-4 w-4 text-gray-500 group-hover:text-blue-600" />
             <span className="text-sm">Notifications</span>
           </Button>
+
           <Button
+          onClick={()=> {
+            navigate("/create-post")
+          }}
             variant="ghost"
             className="w-full justify-start group transition-all duration-300 text-gray-700 hover:text-blue-600 hover:bg-blue-50"
           >
             <PlusSquare className="mr-3 h-4 w-4 text-gray-500 group-hover:text-blue-600" />
             <span className="text-sm">Create Post</span>
           </Button>
+
           <Button
             onClick={() => {
               navigate(`/profile/${userData?.username}`);
@@ -123,6 +202,7 @@ const LeftSidebar = () => {
             <LogOut className="mr-3 h-4 w-4" />
             <span className="text-sm">Log Out</span>
           </Button>
+
           <Button
             variant="ghost"
             className="w-full justify-start text-gray-600 hover:text-blue-600 hover:bg-blue-50 transition-all mt-1"
@@ -130,11 +210,6 @@ const LeftSidebar = () => {
             <Settings className="mr-3 h-4 w-4" />
             <span className="text-sm">Settings</span>
           </Button>
-          <div className="mt-2 px-2">
-            <p className="text-xs text-gray-500 text-center">
-              Made with ❤️ by chaos lovers
-            </p>
-          </div>
         </div>
       </div>
     </aside>

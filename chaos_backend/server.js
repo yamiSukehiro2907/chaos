@@ -19,8 +19,9 @@ app.use(cors({
 
 app.use(cookieParser());
 app.use("/api/auth/", require("./routers/auth.route.js"));
-
 app.use("/api/users/", require("./routers/user.route.js"));
+app.use("/api/posts/" , require("./routers/post.route.js"));
+
 
 async function startServer() {
     await connectMongoDB()

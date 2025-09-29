@@ -10,6 +10,7 @@ import SignIn from "./pages/SignIn.tsx";
 import SignUp from "./pages/SignUp.tsx";
 import { useCurrentUser } from "./hooks/getCurrentUser.ts";
 import type { RootState } from "./redux/store.ts";
+import CreatePost from "./pages/CreatePost.tsx";
 
 const App = () => {
   useCurrentUser();
@@ -45,6 +46,7 @@ const App = () => {
           </ProtectedRoute>
         }
       />
+      <Route path="/create-post" element={<CreatePost />} />
     </Routes>
   );
 };

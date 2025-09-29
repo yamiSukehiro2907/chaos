@@ -10,8 +10,8 @@ const Home = () => {
       <Navbar />
       <div className="flex pt-16">
         <LeftSidebar />
-        <main className="flex-1 ml-64 mr-80 p-6">
-          <div className="max-w-2xl mx-auto">
+        <main className="flex-1 ml-64 mr-[400px] p-6">
+          <div className="w-full max-w-none">
             <Stories />
             <Feed />
           </div>
