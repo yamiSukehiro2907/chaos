@@ -11,9 +11,11 @@ import SignUp from "./pages/SignUp.tsx";
 import { useCurrentUser } from "./hooks/getCurrentUser.ts";
 import type { RootState } from "./redux/store.ts";
 import CreatePost from "./pages/CreatePost.tsx";
+import { useGetAllPosts } from "./hooks/getAllPosts.ts";
 
 const App = () => {
   useCurrentUser();
+  useGetAllPosts();
   const { userData } = useSelector((state: RootState) => state.user);
   return (
     <Routes>

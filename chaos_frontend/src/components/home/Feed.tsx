@@ -8,30 +8,17 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { useState, useEffect } from "react";
-import { getAllPosts } from "@/apiCall/postCall";
-import type { Post } from "@/types/Schema/Post";
+import { useState } from "react";
+import { useSelector } from "react-redux";
+import type { RootState } from "@/redux/store";
 
 const Feed = () => {
-  const [posts, setPosts] = useState<Post[]>([]);
+  const { postData } = useSelector((state: RootState) => state.post);
   const [likedPosts, setLikedPosts] = useState<Record<string, boolean>>({});
   const [bookmarkedPosts, setBookmarkedPosts] = useState<
     Record<string, boolean>
   >({});
   const [notification, setNotification] = useState("");
-
-  useEffect(() => {
-    const fetchPosts = async () => {
-      try {
-        const data = await getAllPosts();
-        setPosts(data);
-      } catch (error) {
-        console.error("Failed to fetch posts:", error);
-      }
-    };
-
-    fetchPosts();
-  }, []);
 
   const showNotification = (message: string) => {
     setNotification(message);
@@ -70,7 +57,7 @@ const Feed = () => {
         </div>
       )}
 
-      {posts.map((post) => (
+      {postData.map((post) => (
         <Card
           key={post._id}
           className="w-full bg-white/80 backdrop-blur-sm border border-blue-200 shadow-lg hover:shadow-xl transition-all duration-300"
