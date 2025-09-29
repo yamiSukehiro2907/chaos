@@ -11,7 +11,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useState, useEffect } from "react";
 import { getAllPosts } from "@/apiCall/postCall";
 import type { Post } from "@/types/Schema/Post";
-import { getUserById } from "@/apiCall/userCall";
 
 const Feed = () => {
   const [posts, setPosts] = useState<Post[]>([]);
@@ -25,15 +24,7 @@ const Feed = () => {
     const fetchPosts = async () => {
       try {
         const data = await getAllPosts();
-
-        const postsWithUsers = await Promise.all(
-          data.map(async (post) => {
-            const user = await getUserById(post.author);
-            return { ...post, user };
-          })
-        );
-
-        setPosts(postsWithUsers);
+        setPosts(data);
       } catch (error) {
         console.error("Failed to fetch posts:", error);
       }
@@ -81,18 +72,18 @@ const Feed = () => {
 
       {posts.map((post) => (
         <Card
-          key={post.id}
+          key={post._id}
           className="w-full bg-white/80 backdrop-blur-sm border border-blue-200 shadow-lg hover:shadow-xl transition-all duration-300"
         >
           <div className="flex items-center justify-between p-6 pb-4">
             <div className="flex items-center space-x-4">
               <Avatar className="w-12 h-12 ring-2 ring-blue-300 hover:ring-blue-400 transition-all">
                 <AvatarImage
-                  src={post.user.profilePicture}
-                  alt={post.user.name}
+                  src={post.author.profilePicture}
+                  alt={post.author.name}
                 />
                 <AvatarFallback className="bg-gradient-to-br from-blue-200 to-blue-300 text-blue-700 font-semibold">
-                  {post.user.name
+                  {post.author.name
                     .split(" ")
                     .map((n) => n[0])
                     .join("")}
@@ -100,10 +91,10 @@ const Feed = () => {
               </Avatar>
               <div>
                 <p className="font-medium text-gray-800 text-lg">
-                  {post.user.name}
+                  {post.author.name}
                 </p>
                 <p className="text-sm text-gray-600">
-                  @{post.user.username} •{" "}
+                  @{post.author.username} •{" "}
                   {new Date(post.createdAt).toLocaleDateString()}
                 </p>
               </div>
@@ -118,23 +109,24 @@ const Feed = () => {
           </div>
 
           <CardContent className="pt-0 px-6 pb-6">
-            {post.mediaType === "image" && (
+            {post.mediaUrl && (
               <div className="mb-6 rounded-xl overflow-hidden border border-blue-200">
                 {post.mediaType === "image" ? (
                   <img
                     src={post.mediaUrl}
                     alt="Post content"
-                    className="w-full h-80 object-cover hover:scale-105 transition-transform duration-300"
+                    className="w-full h-auto max-h-[600px] object-contain bg-gray-50"
                   />
                 ) : (
                   <video
                     src={post.mediaUrl}
                     controls
-                    className="w-full h-80 object-cover"
+                    className="w-full h-auto max-h-[600px] object-contain bg-gray-50"
                   />
                 )}
               </div>
             )}
+
             <p className="mb-4 leading-relaxed text-gray-800 text-base">
               {post.caption}
             </p>
@@ -144,19 +136,19 @@ const Feed = () => {
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => handleLike(post.id)}
+                  onClick={() => handleLike(post._id)}
                   className={`transition-colors px-4 py-2 ${
-                    likedPosts[post.id]
+                    likedPosts[post._id]
                       ? "text-red-500 hover:text-red-600"
                       : "text-gray-500 hover:text-red-500 hover:bg-red-50"
                   }`}
                 >
                   <Heart
                     className={`w-5 h-5 mr-2 ${
-                      likedPosts[post.id] ? "fill-current" : ""
+                      likedPosts[post._id] ? "fill-current" : ""
                     }`}
                   />
-                  {post.likes.length + (likedPosts[post.id] ? 1 : 0)}
+                  {post.likes.length + (likedPosts[post._id] ? 1 : 0)}
                 </Button>
 
                 <Button
@@ -183,16 +175,16 @@ const Feed = () => {
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={() => handleBookmark(post.id)}
+                onClick={() => handleBookmark(post._id)}
                 className={`transition-colors w-10 h-10 ${
-                  bookmarkedPosts[post.id]
+                  bookmarkedPosts[post._id]
                     ? "text-blue-600 hover:text-blue-700"
                     : "text-gray-500 hover:text-blue-600 hover:bg-blue-50"
                 }`}
               >
                 <Bookmark
                   className={`w-5 h-5 ${
-                    bookmarkedPosts[post.id] ? "fill-current" : ""
+                    bookmarkedPosts[post._id] ? "fill-current" : ""
                   }`}
                 />
               </Button>

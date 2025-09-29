@@ -5,7 +5,9 @@ const {uploadCloudinary} = require("../config/cloudinary.config");
 
 const getAllPosts = async (req, res) => {
     try {
-        const posts = await Post.find({}).sort({ createdAt: -1 })
+        const posts = await Post.find({}).populate(
+            'author', 'name username profilePicture'
+        ).sort({createdAt: -1})
         return res.status(200).json(posts);
     } catch (err) {
         return res.status(500).json({message: "Internal Server Error"});
@@ -19,7 +21,6 @@ const createPost = async (req, res) => {
         if (!user) {
             return res.status(404).json({message: "User not found"});
         }
-        console.log(req.body);
         const {mediaType, caption} = req.body;
 
         if (!mediaType || !caption) {
@@ -44,6 +45,20 @@ const createPost = async (req, res) => {
             caption: caption,
             mediaUrl: mediaUrl
         })
+
+
+        const populatedUser = await User.findById(id).populate('posts');
+
+        populatedUser.posts.push(post?._id)
+
+        await populatedUser.save();
+
+
+        const populatedPost = await Post.findById(post?._id).populate(
+            'author', 'name username profilePicture'
+        );
+
+        await populatedPost.save();
 
 
         return res.status(201).json({post});
