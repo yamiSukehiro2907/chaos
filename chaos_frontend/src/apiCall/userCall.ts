@@ -33,3 +33,14 @@ export const editProfile = async (formData: FormData): Promise<User> => {
     throw error;
   }
 };
+
+export const getUserById = async (id: string): Promise<User> => {
+  try {
+    const response = await api.get(`/users/${id}`);
+    console.log(response.data)
+    return response.data;
+  } catch (error) {
+    console.error("Error getting the user: " + error);
+    throw error;
+  }
+};

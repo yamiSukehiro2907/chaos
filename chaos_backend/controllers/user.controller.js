@@ -69,4 +69,19 @@ const editProfile = async (req, res) => {
     }
 };
 
-module.exports = {profile, editProfile, getProfile};
+
+const getProfileByUserId = async (req, res) => {
+    try {
+        const id = req.params.id;
+        if (!id) {
+            return res.status(404).json({message: "Id params missing"});
+        }
+
+        const user = await User.findById(id).select("-password -refreshToken");
+
+        return res.status(200).json(user);
+    } catch (err) {
+        return res.status(500).json({message: "Internal Server Error"});
+    }
+}
+module.exports = {profile, editProfile, getProfile, getProfileByUserId};

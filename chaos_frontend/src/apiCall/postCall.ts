@@ -12,3 +12,13 @@ export const createPost = async (formData: FormData): Promise<Post> => {
     throw error;
   }
 };
+
+export const getAllPosts = async (): Promise<Post[]> => {
+  try {
+    const response = await api.get("/posts/");
+    return response.data;
+  } catch (error) {
+    console.error("Error getting posts: " + error);
+    return [];
+  }
+};
