@@ -22,3 +22,13 @@ export const getAllPosts = async (): Promise<Post[]> => {
     return [];
   }
 };
+
+export const likePost = async (postId: string): Promise<Post> => {
+  try {
+    const response = await api.post(`/posts/like/${postId}`);
+    return response.data;
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+};

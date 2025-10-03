@@ -1,20 +1,14 @@
 import React, { useState, useRef } from "react";
-import {
-  Image,
-  Video,
-  X,
-  Upload,
-  ArrowLeft,
-  Send,
-} from "lucide-react";
+import { Image, Video, X, Upload, ArrowLeft, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import type { RootState } from "@/redux/store";
 import { createPost } from "@/apiCall/postCall";
+import { setPostData } from "@/redux/slices/postSlice";
 
 const CreatePost = () => {
   const [caption, setCaption] = useState("");
@@ -23,6 +17,8 @@ const CreatePost = () => {
   const [mediaType, setMediaType] = useState<"image" | "video" | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const dispatch = useDispatch();
+  const { postData } = useSelector((state: RootState) => state.post);
 
   const { userData } = useSelector((state: RootState) => state.user);
 
@@ -70,6 +66,7 @@ const CreatePost = () => {
       const response = await createPost(formData);
 
       if (response) {
+        dispatch(setPostData([...postData, response]));
         setCaption("");
         setMediaFile(null);
         setMediaPreview(null);

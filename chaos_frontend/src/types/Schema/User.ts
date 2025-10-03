@@ -4,7 +4,7 @@ import type { Story } from "@/types/Schema/Story.ts";
 import type { Reel } from "@/types/Schema/Reel.ts";
 
 export interface User {
-  id: string;
+  _id: string;
   username: string;
   email: string;
   name: string,

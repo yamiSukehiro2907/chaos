@@ -7,6 +7,7 @@ import { Navigate, useLocation } from "react-router-dom";
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   // @ts-ignore
   const { userData } = useSelector((state: RootState) => state.user);
+  
   const location = useLocation();
 
   if (!userData) {
