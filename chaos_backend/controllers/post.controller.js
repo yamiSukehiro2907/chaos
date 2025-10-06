@@ -71,7 +71,6 @@ const likePost = async (req, res) => {
     if (!postId) {
       return res.status(400).json({ message: "PostId is required" });
     }
-    console.log(postId);
     const userId = req.id;
     const post = await Post.findById(postId);
     if (!post) {

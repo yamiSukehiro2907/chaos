@@ -14,9 +14,10 @@ import {
 import { useParams, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { getUserByUsername } from "@/apiCall/userCall";
-import { setProfileData } from "@/redux/slices/userSlice";
+import { setProfileData, setUserData } from "@/redux/slices/userSlice";
 import type { RootState } from "@/redux/store";
 import { ProfilePicture } from "@/components/common/ProfilePicture";
+import { followUser, unFollowUser } from "@/apiCall/followCall";
 
 const ProfilePage: React.FC = () => {
   const { username } = useParams();
@@ -30,9 +31,18 @@ const ProfilePage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<
     "posts" | "reels" | "stories" | "replies"
   >("posts");
-  const [isFollowing, setIsFollowing] = useState(false);
+
+  const [isFollowing, setIsFollowing] = useState(() => {
+    return userData?.following?.some(
+      (id) => id.toString() === profileData?._id.toString()
+    );
+  });
+
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [followersCount, setFollowersCount] = useState(
+    profileData?.followers?.length || 0
+  );
 
   async function getProfile() {
     if (!username) {
@@ -55,7 +65,15 @@ const ProfilePage: React.FC = () => {
 
   useEffect(() => {
     getProfile();
-  }, [username, dispatch]);
+  }, [username]);
+
+  useEffect(() => {
+    setIsFollowing(
+      userData?.following?.some(
+        (id) => id.toString() === profileData?._id.toString()
+      ) || false
+    );
+  }, [userData, profileData]);
 
   const formatDate = (dateString: string): string => {
     return new Date(dateString).toLocaleDateString("en-US", {
@@ -64,8 +82,43 @@ const ProfilePage: React.FC = () => {
     });
   };
 
-  const handleFollow = () => {
-    setIsFollowing(!isFollowing);
+  const handleFollow = async (id: string) => {
+    try {
+      await followUser(id);
+      setIsFollowing(true);
+      if (userData) {
+        dispatch(
+          setUserData({
+            ...userData,
+            following: [...(userData.following || []), id],
+          })
+        );
+      }
+      setFollowersCount(followersCount + 1);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const handleUnfollow = async (id: string) => {
+    try {
+      await unFollowUser(id);
+      setIsFollowing(false);
+      if (userData) {
+        dispatch(
+          setUserData({
+            ...userData,
+            following:
+              userData.following?.filter(
+                (followId) => followId.toString() !== id.toString()
+              ) || [],
+          })
+        );
+      }
+      setFollowersCount(followersCount - 1);
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   const LoadingSpinner: React.FC = () => (
@@ -220,11 +273,17 @@ const ProfilePage: React.FC = () => {
             ) : (
               <div className="flex space-x-3 mt-4 sm:mt-0">
                 <button
-                  onClick={handleFollow}
-                  className={`px-6 py-2 rounded-full font-semibold transition-all ${
+                  onClick={() => {
+                    if (isFollowing) {
+                      handleUnfollow(profileData._id);
+                    } else {
+                      handleFollow(profileData._id);
+                    }
+                  }}
+                  className={`px-6 py-2 rounded-full font-semibold transition-all duration-200 transform hover:scale-105 ${
                     isFollowing
-                      ? "bg-gray-200 text-gray-800 hover:bg-gray-300"
-                      : "bg-blue-600 text-white hover:bg-blue-700 hover:shadow-lg"
+                      ? "bg-white text-gray-800 border-2 border-gray-300 hover:bg-gray-50 hover:border-gray-400"
+                      : "bg-gradient-to-r from-blue-600 to-blue-700 text-white hover:from-blue-700 hover:to-blue-800 shadow-md hover:shadow-lg"
                   }`}
                 >
                   {isFollowing ? "Following" : "Follow"}
@@ -247,22 +306,20 @@ const ProfilePage: React.FC = () => {
             </div>
             <div className="text-center">
               <div className="text-xl sm:text-2xl font-bold text-blue-600">
-                {profileData?.followers?.length || 0}
+                {followersCount}
               </div>
               <div className="text-gray-500 text-sm">Followers</div>
             </div>
             <div className="text-center">
               <div className="text-xl sm:text-2xl font-bold text-blue-600">
-                {profileData?.following?.length || 0}
+                {profileData?.following?.length}
               </div>
               <div className="text-gray-500 text-sm">Following</div>
             </div>
           </div>
         </div>
 
-        {/* Content Tabs */}
         <div className="bg-white rounded-2xl shadow-lg">
-          {/* Tab Navigation */}
           <div className="border-b border-gray-200">
             <nav className="flex space-x-8 px-6">
               {[
@@ -310,7 +367,6 @@ const ProfilePage: React.FC = () => {
             </nav>
           </div>
 
-          {/* Tab Content */}
           <div className="p-6">
             {activeTab === "posts" && (
               <EmptyState
@@ -347,7 +403,6 @@ const ProfilePage: React.FC = () => {
         </div>
       </div>
 
-      {/* Floating Action Button */}
       <button className="fixed bottom-6 right-6 w-14 h-14 bg-gradient-to-r from-blue-600 to-green-600 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110 flex items-center justify-center z-50">
         <Edit3 className="w-6 h-6" />
       </button>

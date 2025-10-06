@@ -3,7 +3,7 @@ const Story = require("../models/story.model.js");
 const User = require("../models/user.model.js");
 const {uploadCloudinary} = require("../config/cloudinary.config");
 
-const getALlStory = async (req, res) => {
+const getAllStory = async (req, res) => {
     try {
         const stories = await Story.find({}).sort({createdAt: -1});
         return res.status(200).json(stories);
@@ -40,4 +40,4 @@ const createStory = async (req, res) => {
     }
 }
 
-module.exports = {getALlStory, createStory};
+module.exports = {getAllStory, createStory};

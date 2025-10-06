@@ -21,6 +21,7 @@ app.use(cookieParser());
 app.use("/api/auth/", require("./routers/auth.route.js"));
 app.use("/api/users/", require("./routers/user.route.js"));
 app.use("/api/posts/" , require("./routers/post.route.js"));
+app.use("/api/friends/" , require("./routers/follow.route.js"))
 
 
 async function startServer() {
